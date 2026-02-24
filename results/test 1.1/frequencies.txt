@@ -1,0 +1,21 @@
+
+
+
+
+
+test_voice__multiband_static_2.wav
+.\build\hearing_phase4_poc.exe `
+>>   --mode static `   
+>>   --in "test_audio\test_voice.wav" `
+>>   --out_off "results\test_voice_off.wav" `
+>>   --out_on  "results\test_voice__multiband_static_2.wav" `
+>>   --loss "50,50,00,0,0,0"   
+
+
+test_voice__multiband_static.wav
+.\build\hearing_phase4_poc.exe `
+>>   --mode static `   
+>>   --in "test_audio\test_voice.wav" `
+>>   --out_off "results\test_voice_off.wav" `
+>>   --out_on  "results\test_voice__multiband_static.wav" `
+>>   --loss "0,30,20,10,20,50"
