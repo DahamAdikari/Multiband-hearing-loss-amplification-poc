@@ -69,6 +69,8 @@ $cmake = "C:\Visual Studio\Product\Community 18\Common7\IDE\CommonExtensions\Mic
 
 & $cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
+Optional (Cache Clearing) - Remove-Item -Recurse -Force build
+
 & $cmake --build build
 
 
