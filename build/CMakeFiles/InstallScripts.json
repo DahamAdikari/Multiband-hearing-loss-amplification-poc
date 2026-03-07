@@ -1,7 +1,7 @@
 {
 	"InstallScripts" : 
 	[
-		"D:/2. Projects/hearing_phase4_poc/build/cmake_install.cmake"
+		"/home/sahas/Projects/Audio_Engine_Clear_tone/Multiband-hearing-loss-amplification-poc/build/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

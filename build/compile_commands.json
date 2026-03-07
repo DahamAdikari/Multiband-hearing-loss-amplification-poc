@@ -1,8 +1,0 @@
-[
-{
-  "directory": "D:/2. Projects/hearing_phase4_poc/build",
-  "command": "\"D:\\0.Installations\\Visual Studio\\Product\\Community 18\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x64\\cl.exe\"  /nologo /TP /DWIN32 /D_WINDOWS /GR /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MD /FoCMakeFiles\\hearing_phase4_poc.dir\\src\\main.cpp.obj /FdCMakeFiles\\hearing_phase4_poc.dir\\ /FS -c \"D:\\2. Projects\\hearing_phase4_poc\\src\\main.cpp\"",
-  "file": "D:/2. Projects/hearing_phase4_poc/src/main.cpp",
-  "output": "D:/2. Projects/hearing_phase4_poc/build/CMakeFiles/hearing_phase4_poc.dir/src/main.cpp.obj"
-}
-]
