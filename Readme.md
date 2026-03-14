@@ -133,6 +133,15 @@ PowerShell terminal runners (copy-paste)
   --stage on `
   --export_root "results"
 
+
+ 
+## New - Run only realtime multiband
+cmake -S . -B build -G Ninja `
+-DCMAKE_TOOLCHAIN_FILE="D:\0.Installations\vcpkg\vcpkg\scripts\buildsystems\vcpkg.cmake" `
+-DVCPKG_TARGET_TRIPLET=x64-windows `
+-DCMAKE_BUILD_TYPE=Release
+
+cmake --build build --target realtime_multiband_stream
   
 
 
