@@ -14,7 +14,13 @@ add_library(cleartone_audio_engine SHARED
 # -----------------------------
 # Desktop real-time executable
 # -----------------------------
-find_package(portaudio CONFIG REQUIRED)
+find_package(portaudio CONFIG QUIET)
+if (NOT portaudio_FOUND)
+    message(STATUS "CLEAR_TONE_CMAKE: portaudio config not found, trying pkg-config")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(PORTAUDIO REQUIRED IMPORTED_TARGET portaudio-2.0)
+    add_library(portaudio ALIAS PkgConfig::PORTAUDIO)
+endif()
 
 add_executable(realtime_multiband_stream
     ${CMAKE_CURRENT_SOURCE_DIR}/src/realtime_multiband_stream.cpp
