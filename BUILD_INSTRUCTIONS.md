@@ -37,6 +37,11 @@ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target realtime_multiband_stream
 ```
 
+or a one-liner like 
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build --target realtime_multiband_stream
+```
+
 ### 3. Run the Project
 After a successful build, the executable will be located inside the `build` directory.
 
