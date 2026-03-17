@@ -211,6 +211,7 @@ public:
   RealtimeProcessor processor;
   std::shared_ptr<oboe::AudioStream> recordingStream;
   std::shared_ptr<oboe::AudioStream> playingStream;
+  oboe::Usage mUsage = oboe::Usage::VoiceCommunication;
 
   std::vector<float> captureBuffer;
   std::vector<float> captureBufferOut;
@@ -228,9 +229,11 @@ public:
     oboe::AudioStreamBuilder outBuilder;
     outBuilder.setDirection(oboe::Direction::Output)
         ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-        ->setSharingMode(oboe::SharingMode::Exclusive)
-        ->setUsage(oboe::Usage::VoiceCommunication)
-        ->setContentType(oboe::ContentType::Speech)
+        ->setSharingMode(oboe::SharingMode::Shared) // Use Shared to avoid competition
+        ->setUsage(mUsage)
+        ->setContentType(mUsage == oboe::Usage::VoiceCommunication 
+                         ? oboe::ContentType::Speech 
+                         : oboe::ContentType::Music)
         ->setFormat(oboe::AudioFormat::Float)
         ->setChannelCount(1)
         ->setErrorCallback(this);
@@ -250,8 +253,8 @@ public:
     oboe::AudioStreamBuilder inBuilder;
     inBuilder.setDirection(oboe::Direction::Input)
         ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-        ->setSharingMode(oboe::SharingMode::Exclusive)
-        ->setUsage(oboe::Usage::VoiceCommunication)
+        ->setSharingMode(oboe::SharingMode::Shared)
+        ->setUsage(mUsage)
         ->setInputPreset(oboe::InputPreset::VoiceCommunication)
         ->setFormat(oboe::AudioFormat::Float)
         ->setChannelCount(1)
@@ -333,6 +336,11 @@ public:
 
   void updateLoss(const float loss[6]) { processor.updateLoss(loss); }
 
+  void setUsage(int usage) {
+    mUsage = static_cast<oboe::Usage>(usage);
+    LOGI("Audio Usage set to: %d", usage);
+  }
+
   // Input Callback
   oboe::DataCallbackResult onAudioReady(oboe::AudioStream *audioStream,
                                         void *audioData,
@@ -387,11 +395,18 @@ public:
       }
     }
 
-    // Write processed data to output stream
-    auto result = playingStream->write(outData, numFrames, 0);
-    if (result.value() != numFrames) {
-      // Handle xrun or error if necessary.
-      // LOGE("Playing stream write underrun/error");
+    // Write processed data to output stream with a small timeout (10ms)
+    // This helps synchronize and avoids dropping frames if output is slightly behind.
+    auto result = playingStream->write(outData, numFrames, 10 * 1000 * 1000); 
+    if (!result) {
+       LOGE("Playing stream write error: %s", oboe::convertToText(result.error()));
+       if (result.error() == oboe::Result::ErrorDisconnected || 
+           result.error() == oboe::Result::ErrorInvalidState) {
+         LOGI("Stopping stream due to fatal write error");
+         return oboe::DataCallbackResult::Stop;
+       }
+    } else if (result.value() != numFrames) {
+       // LOGW("Playing stream write partial: %d/%d", result.value(), numFrames);
     }
 
     return oboe::DataCallbackResult::Continue;
@@ -399,8 +414,14 @@ public:
 
   bool onError(oboe::AudioStream *audioStream, oboe::Result error) override {
     LOGE("Audio stream error: %s", oboe::convertToText(error));
-    stop();
-    return false;
+    // When ErrorDisconnected occurs, the stream is already dead.
+    // The UI will detect this via is_playing_ffi() or the next write error.
+    return false; 
+  }
+
+  bool isPlaying() {
+    return (playingStream && playingStream->getState() == oboe::StreamState::Started) &&
+           (recordingStream && recordingStream->getState() == oboe::StreamState::Started);
   }
 };
 
@@ -450,6 +471,16 @@ debug_save_capture_ffi(const char *filePath, int source) {
 __attribute__((visibility("default"))) __attribute__((used)) int
 debug_get_capture_size_ffi() {
   return gEngine.getCaptureSize();
+}
+
+__attribute__((visibility("default"))) __attribute__((used)) void
+set_audio_usage_ffi(int usage) {
+  gEngine.setUsage(usage);
+}
+
+__attribute__((visibility("default"))) __attribute__((used)) bool
+is_playing_ffi() {
+  return gEngine.isPlaying();
 }
 
 } // extern "C"
